@@ -2,6 +2,7 @@
 library(tibble)
 library(dplyr)
 library(forcats)
+library(ggplot2)
 
 # Generate the data
 df <- tibble(
@@ -10,6 +11,7 @@ df <- tibble(
   Value = sample(20, 10, replace = TRUE)
 )
 
+# Grouped table
 df %>%
   # Concatenate
   bind_rows(
@@ -34,4 +36,37 @@ df %>%
   arrange(
     Group,
     Subgroup
+  )
+
+# Dataviz example
+
+## Group data
+df <- mtcars %>%
+  mutate(
+    cyl = cyl %>% as.character()
+  ) %>%
+  bind_rows(
+    mtcars %>% mutate(cyl = 'Total')
+  ) %>%
+  mutate(
+    cyl = cyl %>% as.factor() %>% fct_relevel("Total", after = Inf)
+  ) %>%
+  group_by(
+    cyl
+  ) %>%
+  summarize(
+    mean_mpg = mean(mpg)
+  )
+
+# Visualize
+ggplot(data = df) +
+  aes(x = cyl, y = mean_mpg) +
+  geom_col(color = "cornflowerblue", fill = "cornflowerblue") +
+  xlab("Number of cylinders") +
+  scale_y_continuous(name = "Miles / gallon", breaks = seq(0, 30, 5)) +
+  ggtitle("Average miles/gallon by number of cylinders") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    text = element_text(size=15)
   )
